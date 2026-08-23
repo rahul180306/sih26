@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import chennaiImg from '@/public/chennai.png';
 
 interface UpperRightAerialCardProps {
   onOpenMap?: () => void;
@@ -15,7 +16,7 @@ export const UpperRightAerialCard: React.FC<UpperRightAerialCardProps> = ({ onOp
     >
       {/* High Quality Aerial River City Photograph (/chennai.png) */}
       <Image 
-        src="/chennai.png" 
+        src={chennaiImg} 
         alt="Chennai Aerial Nowcast" 
         fill
         sizes="(max-width: 768px) 100vw, 400px"

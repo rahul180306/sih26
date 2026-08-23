@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
+import heroImg from '@/public/hero.png';
 import { FeaturePills } from './FeaturePills';
 import { UpperRightAerialCard } from './UpperRightAerialCard';
 import { LowerOrangeCard } from './LowerOrangeCard';
@@ -132,8 +134,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenMap, onOpenHowItWorks }) => {
               y="0"
               width="1440"
               height="840"
-              href="/hero.png"
-              xlinkHref="/hero.png"
+              href={typeof heroImg === 'string' ? heroImg : heroImg.src}
+              xlinkHref={typeof heroImg === 'string' ? heroImg : heroImg.src}
               preserveAspectRatio="xMidYMid slice"
               style={{
                 display: 'block',
@@ -233,12 +235,15 @@ export const Hero: React.FC<HeroProps> = ({ onOpenMap, onOpenHowItWorks }) => {
         {/* Main Hero Card for Mobile / Tablet */}
         <div className="w-full bg-[#0C1017] rounded-[32px] p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/10 flex flex-col justify-between min-h-[500px]">
           
-          {/* Explicit Image Background */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src="/hero.png" 
+          {/* Hero Image Background */}
+          <Image 
+            src={heroImg} 
             alt="Hero Background" 
-            className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none" 
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 1000px"
+            className="object-cover object-center pointer-events-none" 
+            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#080C12]/85 via-[#080C12]/55 to-transparent pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#080C12]/80 via-transparent to-transparent pointer-events-none" />

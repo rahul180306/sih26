@@ -2,12 +2,16 @@
 
 import React from 'react';
 import Image from 'next/image';
+import hori1 from '@/public/hori1.png';
+import hori2 from '@/public/hori2.png';
+import hori3 from '@/public/hori3.png';
+import hori4 from '@/public/hori4.png';
 
 const IMAGES = [
-  { id: '1', src: '/hori1.png', alt: 'Flood inundation mapping and digital twin overview' },
-  { id: '2', src: '/hori2.png', alt: 'Urban drainage network monitoring and surcharge detection' },
-  { id: '3', src: '/hori3.png', alt: 'Terrain elevation and hydrodynamic surface runoff modeling' },
-  { id: '4', src: '/hori4.png', alt: 'Real-time weather radar nowcasting and precipitation telemetry' },
+  { id: '1', src: hori1, alt: 'Flood inundation mapping and digital twin overview' },
+  { id: '2', src: hori2, alt: 'Urban drainage network monitoring and surcharge detection' },
+  { id: '3', src: hori3, alt: 'Terrain elevation and hydrodynamic surface runoff modeling' },
+  { id: '4', src: hori4, alt: 'Real-time weather radar nowcasting and precipitation telemetry' },
 ];
 
 export const HorizontalMarquee: React.FC = () => {
