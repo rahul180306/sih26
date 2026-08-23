@@ -1,0 +1,114 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,800&display=swap');
+
+:root {
+  --orange: #F56A00;
+  --orange-bright: #FF7200;
+  --black: #090E15;
+  --charcoal: #151A20;
+  --white: #FFFFFF;
+  --muted-white: rgba(255, 255, 255, 0.78);
+  --border: rgba(255, 255, 255, 0.22);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: #FFFFFF;
+  color: #090E15;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glass Utilities */
+.glass-pill {
+  background: rgba(21, 26, 32, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.glass-card {
+  background: rgba(21, 26, 32, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.glass-pill-light {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+/* Custom Rain Overlay Effect */
+.rain-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.15;
+}
+
+.rain-drop {
+  position: absolute;
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(transparent, rgba(255, 255, 255, 0.8));
+  animation: fall 1.2s linear infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100px);
+  }
+  100% {
+    transform: translateY(900px);
+  }
+}
+
+/* Radar Sweep animation */
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar {
+  animation: radar-sweep 4s linear infinite;
+}
+
+/* Pulse Glow */
+@keyframes pulse-orange {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 106, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(245, 106, 0, 0);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+

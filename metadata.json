@@ -1,0 +1,6 @@
+{
+  "name": "JalRakshak Urban Hero",
+  "description": "Real-time urban flood nowcasting and climate resilience platform for smart cities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
