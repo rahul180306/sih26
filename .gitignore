@@ -4,5 +4,6 @@ coverage/
 .DS_Store
 *.log
 *.tsbuildinfo
+*README*.md
 .env*
 !.env.example
