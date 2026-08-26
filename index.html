@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>City-Scale Underground Drainage & Stormwater Digital Twin</title>
+
+  <!-- MapLibre GL JS -->
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #070B12;
+      --panel-bg: rgba(13, 19, 33, 0.92);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --accent-green: #00FF66;
+      --accent-amber: #FFA500;
+      --accent-red: #FF3333;
+      --accent-cyan: #38BDF8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: #E2E8F0;
+    }
+
+    #map {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* ─── Top Control & Status Ribbon ─────────────────────────────────────── */
+    .top-ribbon {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .glass-card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 12px 18px;
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7);
+      pointer-events: auto;
+    }
+
+    .branding {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(235, 90, 0, 0.15);
+      border: 1px solid rgba(235, 90, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #EB5A00;
+      font-size: 20px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: #FFF;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: #94A3B8;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Cause & Effect Propagation Simulation Scrubber */
+    .sim-controller {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 18px;
+    }
+
+    .sim-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sim-slider {
+      width: 170px;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    .sim-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 13px;
+      color: #FFF;
+      min-width: 75px;
+    }
+
+    /* ─── Floating Sidebar (Left HUD) ─────────────────────────────────────── */
+    .hud-sidebar {
+      position: absolute;
+      top: 86px;
+      left: 16px;
+      z-index: 20;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .hud-section-title {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748B;
+      margin-bottom: 8px;
+    }
+
+    /* Filter Buttons */
+    .filter-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .filter-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #CBD5E1;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(235, 90, 0, 0.2);
+      border-color: rgba(235, 90, 0, 0.6);
+      color: #FFF;
+    }
+
+    .filter-btn.crit-active {
+      background: rgba(255, 51, 51, 0.2);
+      border-color: rgba(255, 51, 51, 0.6);
+      color: #FF8888;
+    }
+
+    /* Dynamic Propagation Flow Chain */
+    .propagation-chain {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .chain-step {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Legend Box */
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 4px;
+    }
+
+    .legend-indicator {
+      width: 14px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    /* ─── MapLibre Popup Inspection Card ──────────────────────────────────── */
+    .maplibregl-popup-content {
+      background: rgba(13, 19, 33, 0.96) !important;
+      backdrop-filter: blur(16px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-radius: 16px !important;
+      padding: 18px !important;
+      color: #FFF !important;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7) !important;
+      min-width: 260px;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    .maplibregl-popup-tip {
+      border-top-color: rgba(13, 19, 33, 0.96) !important;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #FFF;
+      line-height: 1.2;
+    }
+
+    .card-blueprint {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #94A3B8;
+      margin-bottom: 12px;
+    }
+
+    /* Surcharge Capacity Progress Bar */
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      margin-bottom: 10px;
+    }
+
+    .metric-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 6px 8px;
+    }
+
+    .metric-lbl {
+      color: #64748B;
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .metric-val {
+      font-weight: 800;
+      color: #FFF;
+      margin-top: 2px;
+      font-size: 12px;
+    }
+
+    .alert-chip {
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .alert-chip.safe {
+      background: rgba(0, 255, 102, 0.15);
+      border: 1px solid rgba(0, 255, 102, 0.3);
+      color: #34D399;
+    }
+
+    .alert-chip.critical {
+      background: rgba(255, 51, 51, 0.2);
+      border: 1px solid rgba(255, 51, 51, 0.5);
+      color: #FCA5A5;
+      animation: pulseAlert 1.5s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    /* ─── Emergency Routing Panel (Right Drawer) ───────────────────────────── */
+    .route-panel {
+      position: absolute;
+      top: 86px;
+      right: 16px;
+      z-index: 20;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .route-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .route-label {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748B;
+      margin-bottom: 2px;
+    }
+
+    .route-select {
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 7px 10px;
+      color: #E2E8F0;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+    }
+
+    .route-select:focus {
+      border-color: #00B2FF;
+    }
+
+    .route-btn {
+      width: 100%;
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .route-btn.primary {
+      background: linear-gradient(135deg, #0284C7, #00B2FF);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0,178,255,0.4);
+    }
+
+    .route-btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0,178,255,0.55);
+    }
+
+    .route-btn.danger {
+      background: rgba(255,51,51,0.15);
+      border: 1px solid rgba(255,51,51,0.4);
+      color: #FCA5A5;
+    }
+
+    .route-btn.danger:hover {
+      background: rgba(255,51,51,0.25);
+    }
+
+    .route-result {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .route-result.visible { display: flex; }
+
+    .route-step {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #94A3B8;
+      padding: 5px 8px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 6px;
+      border-left: 2px solid #00B2FF;
+      line-height: 1.4;
+    }
+
+    .route-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .route-badge.safe {
+      background: rgba(0,178,255,0.2);
+      border: 1px solid rgba(0,178,255,0.5);
+      color: #00B2FF;
+    }
+
+    .route-badge.hazard {
+      background: rgba(255,51,51,0.2);
+      border: 1px solid rgba(255,51,51,0.5);
+      color: #FF6666;
+    }
+
+    .route-spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #00B2FF;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen Map Canvas -->
+  <div id="map"></div>
+
+  <!-- ─── TOP CONTROL RIBBON ──────────────────────────────────────────────── -->
+  <div class="top-ribbon">
+    <div class="glass-card branding">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">JalRakshak Underground Twin</div>
+        <div class="brand-subtitle">1D Pipe Graph & 2D Terrain Hydrodynamic Model</div>
+      </div>
+    </div>
+
+    <!-- Live Doppler Rainfall Scrubber (Demonstrates Cause-and-Effect) -->
+    <div class="glass-card sim-controller">
+      <div class="sim-label">
+        <span>🌧</span> Doppler Rainfall Input
+      </div>
+      <input type="range" id="rainfall-scrubber" class="sim-slider" min="10" max="150" value="45" step="5" />
+      <div class="sim-val" id="rainfall-display">45 mm/hr</div>
+    </div>
+  </div>
+
+  <!-- ─── LEFT HUD CONTROLLER ─────────────────────────────────────────────── -->
+  <div class="hud-sidebar">
+    <!-- Network Layer Filters -->
+    <div class="glass-card">
+      <div class="hud-section-title">Network Filter</div>
+      <div class="filter-group">
+        <button class="filter-btn active" id="btn-filter-all">All Pipes (12)</button>
+        <button class="filter-btn" id="btn-filter-crit">Critical Only</button>
+      </div>
+    </div>
+
+    <!-- Cause & Effect Status Tracker -->
+    <div class="glass-card">
+      <div class="hud-section-title">Hydro-Chain Propagation</div>
+      <div class="propagation-chain">
+        <div class="chain-step" id="chain-rain" style="border-color: #38BDF8;">
+          <span style="color: #94A3B8;">1. Radar Storm</span>
+          <span id="stat-rain" style="color: #38BDF8; font-weight: 800;">45 mm/hr</span>
+        </div>
+        <div class="chain-step" id="chain-pipe" style="border-color: #00FF66;">
+          <span style="color: #94A3B8;">2. Pipe Capacity</span>
+          <span id="stat-pipe" style="color: #00FF66; font-weight: 800;">Normal (64%)</span>
+        </div>
+        <div class="chain-step" id="chain-node" style="border-color: #38BDF8;">
+          <span style="color: #94A3B8;">3. Manhole State</span>
+          <span id="stat-node" style="color: #34D399; font-weight: 800;">Free Inflow</span>
+        </div>
+        <div class="chain-step" id="chain-street" style="border-color: #64748B;">
+          <span style="color: #94A3B8;">4. Street Ponding</span>
+          <span id="stat-street" style="color: #64748B; font-weight: 800;">0 cm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Legend -->
+    <div class="glass-card">
+      <div class="hud-section-title">Hydraulic Strain Legend</div>
+      <div class="legend-row">
+        <div class="legend-indicator" style="background: var(--accent-green);"></div>
+        <span>Normal Flow (&lt;70% Cap)</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-indicator" style="background: var(--accent-amber);"></div>
+        <span>Surcharged (70%-99%)</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-indicator" style="background: var(--accent-red);"></div>
+        <span>Critical / Backflow (&ge;100%)</span>
+      </div>
+      <div class="legend-row" style="margin-top: 6px;">
+        <div class="legend-indicator" style="background: #0284C7; height: 8px; border-radius: 2px;"></div>
+        <span>2D Street Inundation Depth</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RIGHT PANEL: EMERGENCY ROUTING ──────────────────────────────────── -->
+  <div class="route-panel">
+    <div class="glass-card">
+      <div class="hud-section-title" style="margin-bottom:10px;">🚑 Emergency Flood-Safe Router</div>
+      <div class="route-input-group">
+        <div class="route-label">Origin Intersection</div>
+        <select id="route-origin" class="route-select">
+          <option value="N_SION">Sion Circle Junction</option>
+          <option value="N_KING_CIRCLE">King Circle / Gandhi Market</option>
+          <option value="N_DADAR_TT" selected>Dadar TT Circle</option>
+          <option value="N_HINDMATA">Hindmata Junction / Dr. Ambedkar Rd</option>
+          <option value="N_PAREL">Parel TT / KEM Hospital</option>
+          <option value="N_FREEWAY_ENTRY">Eastern Freeway Wadala Ramp</option>
+        </select>
+      </div>
+
+      <div class="route-input-group" style="margin-top:8px;">
+        <div class="route-label">Destination Intersection</div>
+        <select id="route-dest" class="route-select">
+          <option value="N_BYCULLA" selected>Byculla Fire Station / JJ Flyover</option>
+          <option value="N_LALBAUG">Lalbaug Flyover Approach</option>
+          <option value="N_WORLI_NAKA">Worli Naka Junction</option>
+          <option value="N_FREEWAY_EXIT">Eastern Freeway P D'Mello Ramp</option>
+          <option value="N_PAREL">Parel TT / KEM Hospital</option>
+        </select>
+      </div>
+
+      <div class="route-input-group" style="margin-top:8px;">
+        <div class="route-label">Vehicle Type</div>
+        <select id="route-vehicle" class="route-select">
+          <option value="EMERGENCY_AMBULANCE" selected>🚑 Emergency Ambulance (30cm limit)</option>
+          <option value="COMMUTER_CAR">🚗 Commuter Car (15cm limit)</option>
+          <option value="HIGH_CLEARANCE_TRUCK">🚛 High-Clearance Truck (60cm limit)</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <button class="route-btn primary" id="btn-find-route" onclick="displayFloodSafeRoute()">
+          <div class="route-spinner" id="route-spinner"></div>
+          <span id="btn-route-label">Find Safe Route</span>
+        </button>
+        <button class="route-btn danger" id="btn-clear-route" onclick="clearRoute()" style="width:auto;padding:9px 12px;">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Turn-by-Turn Result Card -->
+    <div class="glass-card route-result" id="route-result-card">
+      <div id="route-summary" style="font-size:11px;font-family:'JetBrains Mono',monospace;"></div>
+      <div id="route-steps" class="route-input-group"></div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. MAPLIBRE GL JS SETUP & VECTOR BASEMAP
+       ========================================================================= */
+
+    // Free Open-Source Dark Matter Vector/Raster Basemap Style (No key required)
+    const darkCanvasStyle = {
+      version: 8,
+      sources: {
+        'esri-dark-canvas': {
+          type: 'raster',
+          tiles: [
+            'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+          ],
+          tileSize: 256,
+          attribution: '© Esri, OpenStreetMap contributors, JalRakshak Coupled Twin'
+        }
+      },
+      layers: [
+        {
+          id: 'esri-dark-layer',
+          type: 'raster',
+          source: 'esri-dark-canvas',
+          minzoom: 0,
+          maxzoom: 20
+        }
+      ]
+    };
+
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: darkCanvasStyle,
+      center: [72.8440, 19.0220],
+      zoom: 14.5,
+      pitch: 35,
+      bearing: -5,
+      antialias: true
+    });
+
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+
+    /* =========================================================================
+       2. UNIFIED GEOJSON REPOSITORY (1D Directed Graph & 2D Surface Depth)
+       ========================================================================= */
+
+    const networkData = {
+      pipes: [
+        { id: 'PIPE-P101', name: 'Hindmata Drop Culvert', material: 'RCC Box Culvert', diameter_m: 1.8, coords: [[72.8478, 19.0178], [72.8450, 19.0220]], baseCapacity: 12.5, upstreamId: 'MH-101', downstreamId: 'MH-102' },
+        { id: 'PIPE-P102', name: 'Dadar Interceptor Conduit', material: 'Reinforced Concrete (RCC)', diameter_m: 2.2, coords: [[72.8450, 19.0220], [72.8410, 19.0290]], baseCapacity: 16.0, upstreamId: 'MH-102', downstreamId: 'MH-103' },
+        { id: 'PIPE-P103', name: 'Prabhadevi High-Discharge Canal', material: 'HDPE Lined Channel', diameter_m: 2.5, coords: [[72.8410, 19.0290], [72.8360, 19.0350]], baseCapacity: 22.0, upstreamId: 'MH-103', downstreamId: 'MH-104' },
+        { id: 'PIPE-P104', name: 'Mahim Creek Tidal Outfall', material: 'Masonry Box Duct', diameter_m: 3.0, coords: [[72.8360, 19.0350], [72.8320, 19.0410]], baseCapacity: 30.0, upstreamId: 'MH-104', downstreamId: 'OUTFALL-01' },
+        { id: 'PIPE-P105', name: 'Senapati Bapat Subsurface Line', material: 'RCC Circular Pipe', diameter_m: 1.2, coords: [[72.8390, 19.0160], [72.8450, 19.0220]], baseCapacity: 8.5, upstreamId: 'MH-105', downstreamId: 'MH-102' },
+        { id: 'PIPE-P106', name: 'Elphinstone Relief Bypass', material: 'Cast Iron (CI)', diameter_m: 1.4, coords: [[72.8450, 19.0220], [72.8380, 19.0260]], baseCapacity: 10.0, upstreamId: 'MH-102', downstreamId: 'MH-106' }
+      ],
+      nodes: [
+        { id: 'MH-101', name: 'Hindmata Flyover Sump', type: 'INLET', coords: [72.8478, 19.0178], groundElev: 8.9 },
+        { id: 'MH-102', name: 'Dadar TT Central Junction', type: 'MANHOLE', coords: [72.8450, 19.0220], groundElev: 7.8 },
+        { id: 'MH-103', name: 'Prabhadevi Surcharge Vault', type: 'MANHOLE', coords: [72.8410, 19.0290], groundElev: 6.9 },
+        { id: 'MH-104', name: 'Mahim Causeway Gate Chamber', type: 'JUNCTION', coords: [72.8360, 19.0350], groundElev: 4.5 },
+        { id: 'OUTFALL-01', name: 'Mahim Creek Discharge Outfall', type: 'OUTFALL', coords: [72.8320, 19.0410], groundElev: 2.1 },
+        { id: 'MH-105', name: 'Senapati Bapat Inflow Grate', type: 'INLET', coords: [72.8390, 19.0160], groundElev: 9.5 },
+        { id: 'MH-106', name: 'Elphinstone Sump Chamber', type: 'PUMP', coords: [72.8380, 19.0260], groundElev: 6.2 }
+      ],
+      floodPolygons: [
+        {
+          id: 'FLOOD-HINDMATA',
+          name: 'Hindmata Dadar TT Inundation Basin',
+          centerNode: 'MH-102',
+          coords: [
+            [72.8430, 19.0200],
+            [72.8470, 19.0205],
+            [72.8480, 19.0245],
+            [72.8440, 19.0240],
+            [72.8430, 19.0200]
+          ]
+        },
+        {
+          id: 'FLOOD-PRABHADEVI',
+          name: 'Prabhadevi Junction Backflow Zone',
+          centerNode: 'MH-103',
+          coords: [
+            [72.8395, 19.0275],
+            [72.8425, 19.0280],
+            [72.8420, 19.0310],
+            [72.8390, 19.0305],
+            [72.8395, 19.0275]
+          ]
+        }
+      ]
+    };
+
+    /* =========================================================================
+       3. HYDRODYNAMIC MATHEMATICAL ENGINE
+       ========================================================================= */
+
+    function computeHydraulicModel(rainfallRate) {
+      const runoffFactor = rainfallRate / 45;
+
+      const edgeFeatures = networkData.pipes.map(p => {
+        const flow_m3s = +(p.baseCapacity * 0.65 * runoffFactor).toFixed(2);
+        const capacity_pct = Math.round((flow_m3s / p.baseCapacity) * 100);
+        const flow_velocity_ms = +(1.2 + (flow_m3s / p.baseCapacity) * 1.6).toFixed(2);
+
+        let hydraulic_status = 'Normal';
+        if (capacity_pct >= 100) hydraulic_status = 'Critical';
+        else if (capacity_pct >= 70) hydraulic_status = 'Surcharged';
+
+        return {
+          type: 'Feature',
+          properties: {
+            id: p.id,
+            name: p.name,
+            type: 'pipe',
+            material: p.material,
+            diameter_m: p.diameter_m,
+            flow_m3s: flow_m3s,
+            capacity_m3s: p.baseCapacity,
+            capacity_pct: capacity_pct,
+            flow_velocity_ms: flow_velocity_ms,
+            hydraulic_status: hydraulic_status,
+            upstreamId: p.upstreamId,
+            downstreamId: p.downstreamId
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: p.coords
+          }
+        };
+      });
+
+      const nodeFeatures = networkData.nodes.map(n => {
+        const connectedPipes = edgeFeatures.filter(e => e.properties.upstreamId === n.id || e.properties.downstreamId === n.id);
+        const maxUtil = connectedPipes.reduce((max, e) => Math.max(max, e.properties.capacity_pct), 0);
+
+        let backflow_alert = maxUtil >= 100;
+        let surface_depth_cm = backflow_alert ? Math.round((maxUtil - 100) * 1.2 + 10) : 0;
+
+        return {
+          type: 'Feature',
+          properties: {
+            id: n.id,
+            name: n.name,
+            type: n.type,
+            groundElev: n.groundElev,
+            maxUtil: maxUtil,
+            backflow_alert: backflow_alert,
+            surface_depth_cm: surface_depth_cm,
+            hydraulic_status: maxUtil >= 100 ? 'Critical' : maxUtil >= 70 ? 'Surcharged' : 'Normal'
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: n.coords
+          }
+        };
+      });
+
+      const floodFeatures = networkData.floodPolygons.map(f => {
+        const centerNode = nodeFeatures.find(n => n.properties.id === f.centerNode);
+        const depth_cm = centerNode ? centerNode.properties.surface_depth_cm : 0;
+        const isFlooding = depth_cm > 0;
+
+        return {
+          type: 'Feature',
+          properties: {
+            id: f.id,
+            name: f.name,
+            depth_cm: depth_cm,
+            isFlooding: isFlooding
+          },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [f.coords]
+          }
+        };
+      });
+
+      return {
+        networkGeoJSON: {
+          type: 'FeatureCollection',
+          features: [...edgeFeatures, ...nodeFeatures]
+        },
+        floodGeoJSON: {
+          type: 'FeatureCollection',
+          features: floodFeatures
+        },
+        stats: {
+          avgUtil: Math.round(edgeFeatures.reduce((s, e) => s + e.properties.capacity_pct, 0) / edgeFeatures.length),
+          maxDepthCm: Math.max(...nodeFeatures.map(n => n.properties.surface_depth_cm)),
+          critCount: edgeFeatures.filter(e => e.properties.hydraulic_status === 'Critical').length
+        }
+      };
+    }
+
+    /* =========================================================================
+       4. MAP INITIALIZATION & DATA-DRIVEN STYLING
+       ========================================================================= */
+
+    let currentRainfall = 45;
+
+    map.on('load', () => {
+      const initialModel = computeHydraulicModel(currentRainfall);
+
+      // 2D Flood Inundation Layer
+      map.addSource('flood-polygons-source', {
+        type: 'geojson',
+        data: initialModel.floodGeoJSON
+      });
+
+      map.addLayer({
+        id: 'flood-polygons-fill',
+        type: 'fill',
+        source: 'flood-polygons-source',
+        paint: {
+          'fill-color': '#0284C7',
+          'fill-opacity': [
+            'case',
+            ['>', ['get', 'depth_cm'], 0],
+            ['interpolate', ['linear'], ['get', 'depth_cm'], 5, 0.3, 40, 0.75, 80, 0.9],
+            0
+          ]
+        }
+      });
+
+      map.addLayer({
+        id: 'flood-polygons-outline',
+        type: 'line',
+        source: 'flood-polygons-source',
+        paint: {
+          'line-color': '#38BDF8',
+          'line-width': 1.5,
+          'line-dasharray': [2, 2],
+          'line-opacity': ['case', ['>', ['get', 'depth_cm'], 0], 0.9, 0]
+        }
+      });
+
+      // 1D Drainage Graph
+      map.addSource('drainage-network-source', {
+        type: 'geojson',
+        data: initialModel.networkGeoJSON
+      });
+
+      map.addLayer({
+        id: 'drainage-pipes-glow',
+        type: 'line',
+        source: 'drainage-network-source',
+        filter: ['==', '$type', 'LineString'],
+        paint: {
+          'line-color': [
+            'match',
+            ['get', 'hydraulic_status'],
+            'Normal', '#00FF66',
+            'Surcharged', '#FFA500',
+            'Critical', '#FF3333',
+            '#00FF66'
+          ],
+          'line-width': 14,
+          'line-opacity': 0.35,
+          'line-blur': 4
+        }
+      });
+
+      map.addLayer({
+        id: 'drainage-pipes-line',
+        type: 'line',
+        source: 'drainage-network-source',
+        filter: ['==', '$type', 'LineString'],
+        paint: {
+          'line-color': [
+            'match',
+            ['get', 'hydraulic_status'],
+            'Normal', '#00FF66',
+            'Surcharged', '#FFA500',
+            'Critical', '#FF3333',
+            '#00FF66'
+          ],
+          'line-width': 4.5,
+          'line-opacity': 0.95
+        }
+      });
+
+      map.addLayer({
+        id: 'drainage-pipes-flow-dash',
+        type: 'line',
+        source: 'drainage-network-source',
+        filter: ['==', '$type', 'LineString'],
+        paint: {
+          'line-color': '#FFFFFF',
+          'line-width': 2,
+          'line-dasharray': [2, 3],
+          'line-opacity': 0.85
+        }
+      });
+
+      map.addLayer({
+        id: 'drainage-nodes-circle',
+        type: 'circle',
+        source: 'drainage-network-source',
+        filter: ['==', '$type', 'Point'],
+        paint: {
+          'circle-radius': [
+            'case',
+            ['get', 'backflow_alert'],
+            11,
+            6
+          ],
+          'circle-color': [
+            'match',
+            ['get', 'hydraulic_status'],
+            'Normal', '#00FF66',
+            'Surcharged', '#FFA500',
+            'Critical', '#FF3333',
+            '#38BDF8'
+          ],
+          'circle-stroke-width': 2.5,
+          'circle-stroke-color': '#FFFFFF',
+          'circle-opacity': 1
+        }
+      });
+
+      /* =======================================================================
+         5. INTERACTION & ASSET TELEMETRY POPUPS
+         ======================================================================= */
+      const popup = new maplibregl.Popup({
+        closeButton: true,
+        closeOnClick: true,
+        offset: 12
+      });
+
+      map.on('click', 'drainage-pipes-line', (e) => {
+        const p = e.features[0].properties;
+        const isCrit = p.hydraulic_status === 'Critical';
+        const isSur = p.hydraulic_status === 'Surcharged';
+        const color = isCrit ? 'var(--accent-red)' : isSur ? 'var(--accent-amber)' : 'var(--accent-green)';
+        const progressFill = isCrit ? '#FF3333' : isSur ? '#FFA500' : '#00FF66';
+
+        popup.setLngLat(e.lngLat)
+          .setHTML(`
+            <div class="card-header">
+              <div class="card-title">${p.name}</div>
+            </div>
+            <div class="card-blueprint">PIPE [${p.id}] - ${p.material} (Ø ${p.diameter_m}m)</div>
+
+            <div style="display:flex;justify-content:space-between;font-size:10px;font-family:'JetBrains Mono';margin-bottom:4px;">
+              <span style="color:#94A3B8;">HYDRAULIC LOAD</span>
+              <span style="font-weight:800;color:${color};">${p.capacity_pct}%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:${Math.min(100, p.capacity_pct)}%;background:${progressFill};"></div>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-box">
+                <div class="metric-lbl">Flow (Q)</div>
+                <div class="metric-val" style="color:var(--accent-cyan);">${p.flow_m3s} m³/s</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-lbl">Max Capacity</div>
+                <div class="metric-val">${p.capacity_m3s} m³/s</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-lbl">Velocity (V)</div>
+                <div class="metric-val" style="color:var(--accent-amber);">${p.flow_velocity_ms} m/s</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-lbl">Route Path</div>
+                <div class="metric-val" style="font-size:10px;">${p.upstreamId} ➔ ${p.downstreamId}</div>
+              </div>
+            </div>
+
+            <div class="alert-chip ${isCrit ? 'critical' : 'safe'}">
+              ${isCrit
+                ? '🚨 Backwater Head Backpressure Detected (Surcharged)'
+                : '✅ Free Gravity Discharge Active'
+              }
+            </div>
+          `)
+          .addTo(map);
+      });
+
+      map.on('click', 'drainage-nodes-circle', (e) => {
+        const n = e.features[0].properties;
+        const isCrit = n.backflow_alert;
+
+        popup.setLngLat(e.lngLat)
+          .setHTML(`
+            <div class="card-header">
+              <div class="card-title">${n.name}</div>
+            </div>
+            <div class="card-blueprint">${n.type} NODE [${n.id}]</div>
+
+            <div class="metrics-grid">
+              <div class="metric-box">
+                <div class="metric-lbl">Ground Elevation</div>
+                <div class="metric-val">${n.groundElev} m</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-lbl">Max Pipe Load</div>
+                <div class="metric-val" style="color:${isCrit ? 'var(--accent-red)' : 'var(--accent-green)'};">${n.maxUtil}%</div>
+              </div>
+              <div class="metric-box" style="grid-column: span 2;">
+                <div class="metric-lbl">Surface Accumulation Depth</div>
+                <div class="metric-val" style="color:${n.surface_depth_cm > 0 ? '#F87171' : '#34D399'};font-size:14px;">
+                  ${n.surface_depth_cm} cm
+                </div>
+              </div>
+            </div>
+
+            <div class="alert-chip ${isCrit ? 'critical' : 'safe'}">
+              ${isCrit
+                ? '🚨 Hydraulic Grade Exceeded: Surface Backflow Active'
+                : '✅ Nominal Gravity Intake Operating'
+              }
+            </div>
+          `)
+          .addTo(map);
+      });
+
+      ['drainage-pipes-line', 'drainage-nodes-circle', 'flood-polygons-fill'].forEach(layer => {
+        map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = ''; });
+      });
+
+      // Continuous animation loop for flow dashes
+      let pulsePhase = 0;
+      function animateFlow() {
+        pulsePhase += 0.06;
+        if (map.getLayer('drainage-pipes-flow-dash')) {
+          const offset = (pulsePhase * 7) % 6;
+          map.setPaintProperty('drainage-pipes-flow-dash', 'line-dasharray', [offset, 3]);
+        }
+        requestAnimationFrame(animateFlow);
+      }
+      requestAnimationFrame(animateFlow);
+
+      map.fitBounds([
+        [72.8310, 19.0150],
+        [72.8490, 19.0430]
+      ], { padding: 60, duration: 1000 });
+    });
+
+    /* =========================================================================
+       6. DYNAMIC RAINFALL SCRUBBER (Triggering Real-Time Propagation)
+       ========================================================================= */
+    const scrubber = document.getElementById('rainfall-scrubber');
+    const display = document.getElementById('rainfall-display');
+
+    scrubber.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      currentRainfall = val;
+      display.textContent = `${val} mm/hr`;
+
+      const model = computeHydraulicModel(val);
+
+      if (map.getSource('drainage-network-source')) {
+        map.getSource('drainage-network-source').setData(model.networkGeoJSON);
+      }
+      if (map.getSource('flood-polygons-source')) {
+        map.getSource('flood-polygons-source').setData(model.floodGeoJSON);
+      }
+
+      document.getElementById('stat-rain').textContent = `${val} mm/hr`;
+      
+      const pipeStat = document.getElementById('stat-pipe');
+      if (model.stats.avgUtil >= 100) {
+        pipeStat.textContent = `Critical (${model.stats.avgUtil}%)`;
+        pipeStat.style.color = 'var(--accent-red)';
+      } else if (model.stats.avgUtil >= 70) {
+        pipeStat.textContent = `Surcharged (${model.stats.avgUtil}%)`;
+        pipeStat.style.color = 'var(--accent-amber)';
+      } else {
+        pipeStat.textContent = `Normal (${model.stats.avgUtil}%)`;
+        pipeStat.style.color = 'var(--accent-green)';
+      }
+
+      const nodeStat = document.getElementById('stat-node');
+      const streetStat = document.getElementById('stat-street');
+
+      if (model.stats.maxDepthCm > 0) {
+        nodeStat.textContent = 'Backflow Eruption';
+        nodeStat.style.color = 'var(--accent-red)';
+        streetStat.textContent = `${model.stats.maxDepthCm} cm Depth`;
+        streetStat.style.color = 'var(--accent-cyan)';
+      } else {
+        nodeStat.textContent = 'Free Inflow';
+        nodeStat.style.color = '#34D399';
+        streetStat.textContent = '0 cm';
+        streetStat.style.color = '#64748B';
+      }
+    });
+
+    /* =========================================================================
+       7. EMERGENCY ROUTING: FRONTEND INTEGRATION
+       =========================================================================
+       Connects to the Python FastAPI backend (emergency_flood_router.py)
+       POST http://127.0.0.1:8000/route  ->  Returns flood-safe GeoJSON path
+    ========================================================================= */
+
+    const ROUTING_API = 'http://127.0.0.1:8000';
+
+    // ─── renderRouteLineOnMap: Draws both safe + hazard routes on map canvas ───
+    function renderRouteLineOnMap(safeCoords, hazardCoords) {
+      // 1. Draw Hazardous Standard Route (Dashed Red)
+      const hazardGeoJson = {
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates: hazardCoords }
+      };
+
+      if (map.getSource('hazard-route-source')) {
+        map.getSource('hazard-route-source').setData(hazardGeoJson);
+      } else {
+        map.addSource('hazard-route-source', { type: 'geojson', data: hazardGeoJson });
+        map.addLayer({
+          id: 'hazard-route-layer',
+          type: 'line',
+          source: 'hazard-route-source',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#FF3333',
+            'line-width': 5,
+            'line-opacity': 0.6,
+            'line-dasharray': [2, 3]
+          }
+        });
+      }
+
+      // 2. Draw Flood-Safe Alternative Route (Solid Electric Blue)
+      const safeGeoJson = {
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates: safeCoords }
+      };
+
+      if (map.getSource('navigation-route-source')) {
+        map.getSource('navigation-route-source').setData(safeGeoJson);
+      } else {
+        map.addSource('navigation-route-source', { type: 'geojson', data: safeGeoJson });
+
+        // Glow halo under safe route
+        map.addLayer({
+          id: 'navigation-route-glow',
+          type: 'line',
+          source: 'navigation-route-source',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#00B2FF',
+            'line-width': 14,
+            'line-opacity': 0.3,
+            'line-blur': 6
+          }
+        });
+
+        // Main safe route line
+        map.addLayer({
+          id: 'navigation-route-layer',
+          type: 'line',
+          source: 'navigation-route-source',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#00B2FF',
+            'line-width': 6,
+            'line-opacity': 0.95
+          }
+        });
+
+        // Animated white direction pulses on top
+        map.addLayer({
+          id: 'navigation-route-pulses',
+          type: 'line',
+          source: 'navigation-route-source',
+          paint: {
+            'line-color': '#FFFFFF',
+            'line-width': 2,
+            'line-dasharray': [2, 4],
+            'line-opacity': 0.9
+          }
+        });
+      }
+
+      // 3. Animate the white pulses (same rAF loop technique as flow dashes)
+      let routePhase = 0;
+      function animateRoutePulse() {
+        routePhase += 0.05;
+        if (map.getLayer('navigation-route-pulses')) {
+          const offset = (routePhase * 6) % 7;
+          map.setPaintProperty('navigation-route-pulses', 'line-dasharray', [offset, 4]);
+        }
+        requestAnimationFrame(animateRoutePulse);
+      }
+      animateRoutePulse();
+
+      // 4. Fit camera to encompass the entire safe route
+      const allCoords = [...safeCoords, ...hazardCoords];
+      const bounds = allCoords.reduce(
+        (acc, coord) => [
+          [Math.min(acc[0][0], coord[0]), Math.min(acc[0][1], coord[1])],
+          [Math.max(acc[1][0], coord[0]), Math.max(acc[1][1], coord[1])]
+        ],
+        [[allCoords[0][0], allCoords[0][1]], [allCoords[0][0], allCoords[0][1]]]
+      );
+      map.fitBounds(bounds, { padding: 70, duration: 1200, pitch: 30 });
+    }
+
+    // ─── displayFloodSafeRoute: Calls backend & renders results ───────────────
+    async function displayFloodSafeRoute() {
+      const origin = document.getElementById('route-origin').value;
+      const destination = document.getElementById('route-dest').value;
+      const vehicleType = document.getElementById('route-vehicle').value;
+
+      const spinner = document.getElementById('route-spinner');
+      const btnLabel = document.getElementById('btn-route-label');
+      spinner.style.display = 'block';
+      btnLabel.textContent = 'Computing...';
+
+      try {
+        const response = await fetch(`${ROUTING_API}/route`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            origin: origin,
+            destination: destination,
+            vehicle_type: vehicleType,
+            critical_backflow_nodes: ['N_HINDMATA'],
+            telemetry_surcharges: { 'PIPE-P101': currentRainfall > 80 ? 122.6 : 55.0 }
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'Success') {
+          renderRouteLineOnMap(data.path_coordinates, data.hazard_coordinates);
+
+          // Populate result card
+          const safeR = data.flood_safe_alternative_route;
+          const stdR = data.standard_route;
+
+          document.getElementById('route-summary').innerHTML = `
+            <div style="margin-bottom:8px;">
+              <span class="route-badge safe">SAFE ROUTE · ${safeR.total_distance_km} km · ~${safeR.estimated_travel_time_min} min</span>
+              &nbsp;
+              <span class="route-badge hazard">HAZARDOUS: ${stdR.flood_risk}</span>
+            </div>
+            <div style="color:#64748B;font-size:10px;margin-bottom:4px;">Via: ${safeR.bypass_corridor_used}</div>
+            <div style="color:#00B2FF;font-size:10px;">${safeR.safety_confidence_score}</div>
+          `;
+
+          const stepsEl = document.getElementById('route-steps');
+          stepsEl.innerHTML = (data.navigation_instructions || []).map(step =>
+            `<div class="route-step">${step}</div>`
+          ).join('');
+
+          document.getElementById('route-result-card').classList.add('visible');
+        } else {
+          alert('Routing Alert: ' + data.message);
+        }
+      } catch (error) {
+        // Fallback: If API server is not running, render pre-computed demo route
+        console.warn('Backend not reachable - rendering demo route:', error);
+        const demoSafe = [
+          [72.8611, 19.0378], [72.8680, 19.0200],
+          [72.8650, 19.0000], [72.8420, 18.9650], [72.8330, 18.9780]
+        ];
+        const demoHazard = [
+          [72.8611, 19.0378], [72.8550, 19.0310], [72.8450, 19.0220],
+          [72.8478, 19.0178], [72.8420, 19.0060], [72.8360, 18.9950], [72.8330, 18.9780]
+        ];
+        renderRouteLineOnMap(demoSafe, demoHazard);
+
+        document.getElementById('route-summary').innerHTML = `
+          <div style="margin-bottom:8px;">
+            <span class="route-badge safe">SAFE ROUTE · 10.0 km · ~9.5 min (DEMO)</span>&nbsp;
+            <span class="route-badge hazard">HAZARDOUS: Dr. Ambedkar Rd flooded</span>
+          </div>
+          <div style="color:#FF9900;font-size:10px;">Backend offline - showing cached demo path. Start: python -m uvicorn emergency_flood_router:app --port 8000</div>
+        `;
+        document.getElementById('route-steps').innerHTML = [
+          'START at Dadar TT Circle',
+          'Continue on Tilak Bridge to Wadala Ramp via Sion Circle Junction',
+          'Continue on Eastern Freeway Elevated Deck via Eastern Freeway Wadala Ramp',
+          'Continue on Eastern Freeway Southbound via Eastern Freeway Elevated Link',
+          'ARRIVE at Byculla Fire Station / JJ Flyover'
+        ].map(s => `<div class="route-step">${s}</div>`).join('');
+
+        document.getElementById('route-result-card').classList.add('visible');
+      } finally {
+        spinner.style.display = 'none';
+        btnLabel.textContent = 'Find Safe Route';
+      }
+    }
+
+    // ─── clearRoute: Removes both route layers and resets result card ─────────
+    function clearRoute() {
+      ['navigation-route-pulses', 'navigation-route-layer', 'navigation-route-glow',
+       'hazard-route-layer'].forEach(id => {
+        if (map.getLayer(id)) map.removeLayer(id);
+      });
+      ['navigation-route-source', 'hazard-route-source'].forEach(id => {
+        if (map.getSource(id)) map.removeSource(id);
+      });
+      document.getElementById('route-result-card').classList.remove('visible');
+      document.getElementById('route-summary').innerHTML = '';
+      document.getElementById('route-steps').innerHTML = '';
+    }
+
+    /* =========================================================================
+       8. FILTER BUTTONS CONTROLLER
+       =========================================================================
+    ** RENAMED from section 7 to section 8 to accommodate routing section above ** */
+    const btnAll = document.getElementById('btn-filter-all');
+    const btnCrit = document.getElementById('btn-filter-crit');
+
+    btnAll.addEventListener('click', () => {
+      btnAll.classList.add('active');
+      btnCrit.classList.remove('crit-active');
+      map.setFilter('drainage-pipes-line', ['==', '$type', 'LineString']);
+      map.setFilter('drainage-pipes-glow', ['==', '$type', 'LineString']);
+      map.setFilter('drainage-pipes-flow-dash', ['==', '$type', 'LineString']);
+    });
+
+    btnCrit.addEventListener('click', () => {
+      btnCrit.classList.add('crit-active');
+      btnAll.classList.remove('active');
+      map.setFilter('drainage-pipes-line', ['all', ['==', '$type', 'LineString'], ['==', 'hydraulic_status', 'Critical']]);
+      map.setFilter('drainage-pipes-glow', ['all', ['==', '$type', 'LineString'], ['==', 'hydraulic_status', 'Critical']]);
+      map.setFilter('drainage-pipes-flow-dash', ['all', ['==', '$type', 'LineString'], ['==', 'hydraulic_status', 'Critical']]);
+    });
+  </script>
+</body>
+</html>
