@@ -38,6 +38,7 @@ import {
 import { DataSourceFabricModal } from './DataSourceFabricModal';
 import { DrainageNetworkPanel } from './DrainageNetworkPanel';
 import { DrainageNetworkView } from './DrainageNetworkView';
+import { AlertsView } from './AlertsView';
 import { RainfallSnapshot } from '@/lib/rainfall/types';
 import {
   CITIES_DATA,
@@ -64,22 +65,41 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
   const markersRef = useRef<any[]>([]);
 
   // Progressive Geographic Drill-down State
-  const [drillLevel, setDrillLevel] = useState<DrillDownLevel>('city'); // start at city for instant action or india
-  const [selectedStateId, setSelectedStateId] = useState<string>('maharashtra');
-  const [selectedCityId, setSelectedCityId] = useState<string>('mumbai');
-  const [selectedCatchmentId, setSelectedCatchmentId] = useState<string>('hindmata');
+  // Read URL query params (city, catchment, tab) on mount so deep-links from /alerts work correctly
+  const getInitialState = () => {
+    if (typeof window === 'undefined') {
+      return { cityId: 'mumbai', stateId: 'maharashtra', catchmentId: 'hindmata', tab: 'Overview' };
+    }
+    const params = new URLSearchParams(window.location.search);
+    const cityParam = params.get('city')?.toLowerCase() || '';
+    const catchmentParam = params.get('catchment') || '';
+    const tabParam = params.get('tab') || localStorage.getItem('jalrakshak_active_tab') || 'Overview';
+
+    const cityStateMap: Record<string, string> = {
+      mumbai: 'maharashtra', chennai: 'tamilnadu', delhi: 'delhi',
+      bengaluru: 'karnataka', kolkata: 'westbengal',
+    };
+    const cityDefaultCatchment: Record<string, string> = {
+      mumbai: 'hindmata', chennai: 'velachery-lake', delhi: 'minto-bridge',
+      bengaluru: 'bellandur-orr', kolkata: 'thanthania',
+    };
+
+    const resolvedCityId = (cityParam && CITIES_DATA[cityParam]) ? cityParam : 'mumbai';
+    const resolvedStateId = cityStateMap[resolvedCityId] || 'maharashtra';
+    const resolvedCatchmentId = catchmentParam || cityDefaultCatchment[resolvedCityId] || 'hindmata';
+
+    return { cityId: resolvedCityId, stateId: resolvedStateId, catchmentId: resolvedCatchmentId, tab: tabParam };
+  };
+
+  const _init = getInitialState();
+
+  const [drillLevel, setDrillLevel] = useState<DrillDownLevel>('city');
+  const [selectedStateId, setSelectedStateId] = useState<string>(_init.stateId);
+  const [selectedCityId, setSelectedCityId] = useState<string>(_init.cityId);
+  const [selectedCatchmentId, setSelectedCatchmentId] = useState<string>(_init.catchmentId);
 
   // UI State
-  const [activeNav, setActiveNav] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tabParam = params.get('tab');
-      const storedTab = localStorage.getItem('jalrakshak_active_tab');
-      if (tabParam) return tabParam;
-      if (storedTab) return storedTab;
-    }
-    return 'Overview';
-  });
+  const [activeNav, setActiveNav] = useState<string>(_init.tab);
 
   const [activeLayer, setActiveLayer] = useState<'depth' | 'flow' | 'rainfall' | 'roads' | 'terrain'>('depth');
   const [searchQuery, setSearchQuery] = useState('');
@@ -155,6 +175,34 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
 
     fetchNasaStream();
     const interval = setInterval(fetchNasaStream, 45000);
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, [currentCityData]);
+
+  // Dynamic active alerts count state
+  const [activeAlertsCount, setActiveAlertsCount] = useState<number>(0);
+
+  // Fetch real-time active alerts count for selected city
+  useEffect(() => {
+    let isCancelled = false;
+    const fetchAlertCount = async () => {
+      try {
+        const res = await fetch(`/api/alerts?city=${encodeURIComponent(currentCityData.id)}&status=ACTIVE`);
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!isCancelled && json.status === 'success') {
+          const count = json.alerts ? json.alerts.length : (json.summary?.critical || 0) + (json.summary?.warning || 0);
+          setActiveAlertsCount(count);
+        }
+      } catch {
+        // Handled silently
+      }
+    };
+
+    fetchAlertCount();
+    const interval = setInterval(fetchAlertCount, 20000);
     return () => {
       isCancelled = true;
       clearInterval(interval);
@@ -338,7 +386,12 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
         ],
       };
 
-      const initialCenter: [number, number] = [CITIES_DATA.mumbai.lng, CITIES_DATA.mumbai.lat];
+      // Use the URL-resolved city center instead of always defaulting to Mumbai
+      const initialCityData = CITIES_DATA[selectedCityId] || CITIES_DATA.mumbai;
+      const initialCatchment = initialCityData.catchments?.find(c => c.id === selectedCatchmentId);
+      const initialCenter: [number, number] = initialCatchment
+        ? [initialCatchment.lng, initialCatchment.lat]
+        : [initialCityData.lng, initialCityData.lat];
 
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
@@ -874,7 +927,7 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
               { label: 'Flood Map', icon: Waves },
               { label: 'Road Impact', icon: RouteIcon },
               { label: 'Drainage Network', icon: GitFork },
-              { label: 'Alerts', icon: Bell, badge: 3 },
+              { label: 'Alerts', icon: Bell, isLive: true },
               { label: 'Routes', icon: NavIcon },
               { label: 'Reports', icon: BarChart3 },
               { label: 'Settings', icon: Settings },
@@ -898,13 +951,14 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
                     <Icon className={`w-4 h-4 ${isActive ? 'text-[#F56A00]' : 'text-white/60'}`} />
                     {!isSidebarCollapsed && <span>{item.label}</span>}
                   </div>
-                  {item.badge && !isSidebarCollapsed && (
-                    <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-extrabold flex items-center justify-center">
-                      {item.badge}
+                  {item.isLive && !isSidebarCollapsed && (
+                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] font-extrabold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                      <span>LIVE</span>
                     </span>
                   )}
-                  {item.badge && isSidebarCollapsed && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+                  {item.isLive && isSidebarCollapsed && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                   )}
                 </button>
               );
@@ -947,14 +1001,22 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
       {/* MAIN DASHBOARD CONTENT AREA                                               */}
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#090D14] overflow-y-auto">
-        
-        {/* Drainage Network Tab — full panel replaces map+cards */}
-        {activeNav === 'Drainage Network' && (
+        {activeNav === 'Drainage Network' ? (
           <DrainageNetworkPanel cityData={currentCityData} />
-        )}
-
-        {/* Top Split Area (Map on Left/Center + Right Side Analytics Cards) */}
-        {activeNav !== 'Drainage Network' && (<div className="grid grid-cols-1 xl:grid-cols-12 gap-5 p-4 lg:p-6 pb-2 lg:pb-3">
+        ) : activeNav === 'Alerts' ? (
+          <div className="w-full">
+            <AlertsView
+              initialCityId={selectedCityId}
+              onNavigateToMap={(cityId, catchmentId) => {
+                drillToCity(cityId, catchmentId);
+                handleNavSelect('Flood Map');
+              }}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Top Split Area (Map on Left/Center + Right Side Analytics Cards) */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 p-4 lg:p-6 pb-2 lg:pb-3">
           
           {/* ========================================================================= */}
           {/* MAP CANVAS CONTAINER (8 Columns on xl)                                    */}
@@ -1603,6 +1665,8 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
           </div>
 
         </div>
+
+          </>
         )}
 
       </div>

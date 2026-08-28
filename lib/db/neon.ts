@@ -93,9 +93,51 @@ export async function initDatabaseSchema() {
     );
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS flood_alerts (
+      id VARCHAR(64) PRIMARY KEY,
+      cap_identifier VARCHAR(128) NOT NULL,
+      city_id VARCHAR(64) NOT NULL,
+      city_name VARCHAR(128) NOT NULL,
+      catchment_id VARCHAR(64),
+      hotspot_name VARCHAR(128) NOT NULL,
+      severity VARCHAR(32) NOT NULL,
+      status VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
+      urgency VARCHAR(32) DEFAULT 'Immediate',
+      certainty VARCHAR(32) DEFAULT 'Observed',
+      headline TEXT NOT NULL,
+      description TEXT NOT NULL,
+      instruction TEXT NOT NULL,
+      predicted_depth_m NUMERIC(5, 2) NOT NULL,
+      drainage_surcharge_pct NUMERIC(5, 2) NOT NULL,
+      lead_time_hours NUMERIC(4, 2) NOT NULL,
+      rainfall_intensity_mm_hr NUMERIC(6, 2) NOT NULL,
+      affected_roads JSONB,
+      vulnerable_population_est INTEGER,
+      lat NUMERIC(9, 6) NOT NULL,
+      lng NUMERIC(9, 6) NOT NULL,
+      source VARCHAR(128),
+      issued_at TIMESTAMPTZ DEFAULT NOW(),
+      expires_at TIMESTAMPTZ
+    );
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS alert_broadcast_logs (
+      id SERIAL PRIMARY KEY,
+      alert_id VARCHAR(64) NOT NULL,
+      channel VARCHAR(32) NOT NULL,
+      recipient_count INTEGER NOT NULL,
+      status VARCHAR(32) DEFAULT 'DELIVERED',
+      dispatched_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `;
+
   // Indexes for high-frequency queries
   await sql`CREATE INDEX IF NOT EXISTS idx_rainfall_snapshots_city ON rainfall_snapshots (city, observed_at DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_flood_logs_city ON flood_inundation_logs (city, logged_at DESC);`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_flood_alerts_city ON flood_alerts (city_id, issued_at DESC);`;
 
   return { success: true, message: 'Neon Postgres schema verified and initialized' };
 }
+
