@@ -1093,9 +1093,14 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
       {/* MAIN DASHBOARD CONTENT AREA                                               */}
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#090D14] overflow-y-auto">
-        {activeNav === 'Drainage Network' ? (
+
+        {/* Drainage Network — rendered when active */}
+        {activeNav === 'Drainage Network' && (
           <DrainageNetworkPanel cityData={currentCityData} />
-        ) : activeNav === 'Alerts' ? (
+        )}
+
+        {/* Alerts — rendered when active */}
+        {activeNav === 'Alerts' && (
           <div className="w-full">
             <AlertsView
               initialCityId={selectedCityId}
@@ -1105,8 +1110,52 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
               }}
             />
           </div>
-        ) : (
+        )}
+
+        {/* Under Construction — for unimplemented tabs */}
+        {(['Live Nowcast', 'Flood Map', 'Road Impact', 'Routes', 'Reports', 'Settings'] as string[]).includes(activeNav) && (
+          <div className="flex-1 flex flex-col items-center justify-center min-h-[80vh] px-6">
+            <div className="relative flex flex-col items-center gap-6 max-w-md text-center">
+              {/* Animated glow ring */}
+              <div className="relative w-28 h-28 flex items-center justify-center">
+                <span className="absolute inset-0 rounded-full bg-[#F56A00]/10 animate-ping" style={{ animationDuration: '2.5s' }} />
+                <span className="absolute inset-2 rounded-full bg-[#F56A00]/10 animate-ping" style={{ animationDuration: '2s', animationDelay: '0.4s' }} />
+                <div className="relative w-20 h-20 rounded-full bg-[#121824] border border-[#F56A00]/40 flex items-center justify-center shadow-2xl">
+                  <Settings className="w-9 h-9 text-[#F56A00]" />
+                </div>
+              </div>
+
+              {/* Text */}
+              <div>
+                <span className="inline-block text-[11px] font-extrabold uppercase tracking-widest text-[#F56A00] mb-3 px-3 py-1 rounded-full bg-[#F56A00]/10 border border-[#F56A00]/20">
+                  Coming Soon
+                </span>
+                <h2 className="text-2xl font-extrabold text-white mt-2 mb-2">
+                  {activeNav}
+                </h2>
+                <p className="text-white/50 text-[14px] leading-relaxed">
+                  This module is currently under active development. Our team is building a full-featured{' '}
+                  <span className="text-white/70 font-semibold">{activeNav.toLowerCase()}</span>{' '}
+                  experience for JalRakshak.
+                </p>
+              </div>
+
+              {/* Back button */}
+              <button
+                onClick={() => setActiveNav('Overview')}
+                className="mt-2 px-6 py-2.5 rounded-xl bg-[#F56A00] hover:bg-[#e05e00] text-white font-bold text-[13px] flex items-center gap-2 transition-all shadow-lg hover:shadow-[#F56A00]/30"
+              >
+                <ArrowRight className="w-4 h-4 rotate-180" />
+                Back to Overview
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Overview + Map — ALWAYS mounted so map stays alive; hidden via CSS when not visible */}
+        <div className={(['Overview'].includes(activeNav) || !(['Drainage Network', 'Alerts', 'Live Nowcast', 'Flood Map', 'Road Impact', 'Routes', 'Reports', 'Settings'] as string[]).includes(activeNav)) ? '' : 'hidden'}>
           <>
+
             {/* Top Split Area (Map on Left/Center + Right Side Analytics Cards) */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 p-4 lg:p-6 pb-2 lg:pb-3">
           
@@ -1780,7 +1829,7 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
         </div>
 
           </>
-        )}
+        </div>
 
       </div>
 
