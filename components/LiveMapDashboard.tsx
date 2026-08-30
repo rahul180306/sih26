@@ -1591,12 +1591,10 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
 
         </div>
 
-        )}
-
         {/* ========================================================================= */}
         {/* BOTTOM ROW: 3 ANALYTICS PANELS                                            */}
         {/* ========================================================================= */}
-        {activeNav !== 'Drainage Network' && (<div className="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 lg:px-6 pt-2 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 lg:px-6 pt-2 pb-8">
           
           {/* Panel 1: Flood Depth Trend Line Chart */}
           <div className="bg-[#0D121C] border border-white/10 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">

@@ -1,15 +1,15 @@
 import { neon, Pool } from '@neondatabase/serverless';
 
-const DEFAULT_NEON_URL =
-  'postgresql://neondb_owner:npg_ueX7iTE2Qjpo@ep-royal-silence-b34de2v0-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
-
 export function getDatabaseUrl(): string {
-  return process.env.DATABASE_URL || process.env.NEON_DATABASE_URL || DEFAULT_NEON_URL;
+  return process.env.DATABASE_URL || process.env.NEON_DATABASE_URL || '';
 }
 
 // Reusable SQL tagged template query runner for serverless queries
 export function getDb() {
   const connectionString = getDatabaseUrl();
+  if (!connectionString) {
+    throw new Error('DATABASE_URL or NEON_DATABASE_URL environment variable is not configured.');
+  }
   return neon(connectionString);
 }
 
@@ -18,8 +18,12 @@ let poolInstance: Pool | null = null;
 
 export function getDbPool(): Pool {
   if (!poolInstance) {
+    const connectionString = getDatabaseUrl();
+    if (!connectionString) {
+      throw new Error('DATABASE_URL or NEON_DATABASE_URL environment variable is not configured.');
+    }
     poolInstance = new Pool({
-      connectionString: getDatabaseUrl(),
+      connectionString,
     });
   }
   return poolInstance;

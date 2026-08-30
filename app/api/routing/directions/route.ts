@@ -647,8 +647,9 @@ Max Flood Encountered: ${safest.maxFloodDepth}m.
 Avoidance Polygons Active: ${avoidPolygonsApplied ? 'Yes, routing actively navigated around submerged hotspots' : 'No'}.
 Give actionable, urgent, and precise driver guidance. Keep under 40 words.`;
 
+        const modelName = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: modelName,
           contents: prompt,
         });
         aiBriefing = response.text?.trim() || '';
