@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "name": "hyderabad-sewerage",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "layer": "stp", "name": "Amberpet Sewage Treatment Plant", "capacity_mld": 339, "status": "OPERATIONAL", "road": "Amberpet Musi Embankment", "category": "A" },
+      "geometry": { "type": "Point", "coordinates": [78.5250, 17.3890] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "stp", "name": "Nagole Mega STP", "capacity_mld": 320, "status": "OPERATIONAL", "road": "Nagole Musi Outfall", "category": "A" },
+      "geometry": { "type": "Point", "coordinates": [78.5680, 17.3750] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "stp", "name": "Nanakramguda Tech Park STP", "capacity_mld": 85, "status": "OPERATIONAL", "road": "Financial District Radial Corridor", "category": "B" },
+      "geometry": { "type": "Point", "coordinates": [78.3450, 17.4180] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "sps", "name": "Fatehnagar Sewage Pumping Station", "capacity_mld": 65, "status": "OPERATIONAL", "road": "Balanagar Highway", "category": "C" },
+      "geometry": { "type": "Point", "coordinates": [78.4480, 17.4620] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "sps", "name": "Puranapool Riverbank SPS", "capacity_mld": 45, "status": "OPERATIONAL", "road": "Musi South Embankment", "category": "C" },
+      "geometry": { "type": "Point", "coordinates": [78.4620, 17.3680] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "sps", "name": "Kavadiguda Drain Relief SPS", "capacity_mld": 50, "status": "OPERATIONAL", "road": "Lower Tank Bund Road", "category": "C" },
+      "geometry": { "type": "Point", "coordinates": [78.4890, 17.4180] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Musi North Trunk Interceptor Main", "type": "sewer", "diameter_m": 1.8 },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4120, 17.3780], [78.4550, 17.3750], [78.4880, 17.3760], [78.5250, 17.3890], [78.5680, 17.3750] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Musi South Trunk Interceptor Main", "type": "sewer", "diameter_m": 1.6 },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4250, 17.3680], [78.4620, 17.3680], [78.5120, 17.3650], [78.5680, 17.3750] ] }
+    }
+  ]
+}

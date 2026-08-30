@@ -1,0 +1,37 @@
+{
+  "type": "FeatureCollection",
+  "name": "pune-flood-hazard-zones",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Sinhagad Road Ekta Nagari Corridor", "category": "very_high", "depth_m": 0.95, "risk": "Very High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [73.8180, 18.4950], [73.8420, 18.4950], [73.8420, 18.4750], [73.8180, 18.4750], [73.8180, 18.4950] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Baba Bhide Bridge - Pulachi Wadi - Deccan", "category": "very_high", "depth_m": 0.88, "risk": "Very High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [73.8410, 18.5250], [73.8580, 18.5250], [73.8580, 18.5120], [73.8410, 18.5120], [73.8410, 18.5250] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Sangamwadi - Bund Garden Basin", "category": "high", "depth_m": 0.58, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [73.8620, 18.5450], [73.8920, 18.5450], [73.8920, 18.5280], [73.8620, 18.5280], [73.8620, 18.5450] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Dapodi - Harris Bridge Mula Basin", "category": "high", "depth_m": 0.52, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [73.8150, 18.5880], [73.8420, 18.5880], [73.8420, 18.5680], [73.8150, 18.5680], [73.8150, 18.5880] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Yerawada - Shanti Nagar Lowlands", "category": "moderate", "depth_m": 0.32, "risk": "Moderate" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [73.8820, 18.5580], [73.9050, 18.5580], [73.9050, 18.5420], [73.8820, 18.5420], [73.8820, 18.5580] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Kothrud Elevated Western Slopes", "category": "very_low", "depth_m": 0.05, "risk": "Very Low" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [73.7920, 18.5150], [73.8250, 18.5150], [73.8250, 18.4920], [73.7920, 18.4920], [73.7920, 18.5150] ] ] }
+    }
+  ]
+}

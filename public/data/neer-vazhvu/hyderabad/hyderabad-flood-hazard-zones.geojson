@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "name": "hyderabad-flood-hazard-zones",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Moosarambagh - Chaderghat Basin", "category": "very_high", "depth_m": 0.85, "risk": "Very High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [78.4850, 17.3780], [78.5250, 17.3780], [78.5250, 17.3620], [78.4850, 17.3620], [78.4850, 17.3780] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Tolichowki Nadeem Colony Low-lying Basin", "category": "very_high", "depth_m": 0.72, "risk": "Very High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [78.3950, 17.4080], [78.4200, 17.4080], [78.4200, 17.3920], [78.3950, 17.3920], [78.3950, 17.4080] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Begumpet Brahmanwadi Corridor", "category": "high", "depth_m": 0.52, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [78.4620, 17.4480], [78.4850, 17.4480], [78.4850, 17.4320], [78.4620, 17.4320], [78.4620, 17.4480] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Nizampet - Bhandari Layout Basin", "category": "high", "depth_m": 0.48, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [78.3750, 17.5250], [78.4050, 17.5250], [78.4050, 17.5020], [78.3750, 17.5020], [78.3750, 17.5250] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Hafiz Baba Nagar Basin", "category": "high", "depth_m": 0.45, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [78.4820, 17.3380], [78.5080, 17.3380], [78.5080, 17.3180], [78.4820, 17.3180], [78.4820, 17.3380] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Alwal - Bowenpally Nullah Fringe", "category": "moderate", "depth_m": 0.28, "risk": "Moderate" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [78.4880, 17.4850], [78.5220, 17.4850], [78.5220, 17.4620], [78.4880, 17.4620], [78.4880, 17.4850] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Gachibowli - Hitec City Elevated Ridge", "category": "very_low", "depth_m": 0.05, "risk": "Very Low" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [78.3450, 17.4480], [78.3850, 17.4480], [78.3850, 17.4220], [78.3450, 17.4220], [78.3450, 17.4480] ] ] }
+    }
+  ]
+}

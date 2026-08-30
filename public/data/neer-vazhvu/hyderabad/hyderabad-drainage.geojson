@@ -1,0 +1,82 @@
+{
+  "type": "FeatureCollection",
+  "name": "hyderabad-drainage",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-001", "name": "Kukatpally Macro Nullah", "street": "Kukatpally to Hussain Sagar Channel", "drain_type": "macro", "type": "macro", "drain_wid": 4.2, "drain_dep": 2.8, "drain_len": 6800, "status": "Bad", "material": "Reinforced Concrete Wall", "ward": "Ward 121 (Kukatpally)", "zone": "Kukatpally Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4110, 17.4850], [78.4320, 17.4680], [78.4550, 17.4480], [78.4680, 17.4320] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-002", "name": "Balkapur Macro Channel", "street": "Balkapur Channel Corridor", "drain_type": "macro", "type": "macro", "drain_wid": 3.8, "drain_dep": 2.5, "drain_len": 5400, "status": "Good", "material": "Masonry Channel", "ward": "Ward 72 (Mehdipatnam)", "zone": "Khairatabad Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4050, 17.3920], [78.4280, 17.3980], [78.4480, 17.3950], [78.4620, 17.3880] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-003", "name": "Picket Nala Trunk", "street": "Secunderabad Picket Nullah", "drain_type": "macro", "type": "macro", "drain_wid": 3.4, "drain_dep": 2.2, "drain_len": 4200, "status": "Bad", "material": "Concrete Box Culvert", "ward": "Ward 147 (Secunderabad)", "zone": "Secunderabad Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4980, 17.4580], [78.4910, 17.4420], [78.4810, 17.4310], [78.4750, 17.4260] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-004", "name": "Hussain Sagar Surplus Outfall", "street": "Hussain Sagar Surplus Drain", "drain_type": "macro", "type": "macro", "drain_wid": 5.0, "drain_dep": 3.2, "drain_len": 3800, "status": "Good", "material": "Reinforced Concrete Sluice Channel", "ward": "Ward 85 (Musheerabad)", "zone": "Secunderabad Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4820, 17.4220], [78.4920, 17.4110], [78.5020, 17.3980], [78.5120, 17.3820] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-005", "name": "Banjara Hills Storm Trunk", "street": "Road No 12 Banjara Hills", "drain_type": "macro", "type": "macro", "drain_wid": 2.8, "drain_dep": 2.0, "drain_len": 3100, "status": "Good", "material": "Precast Concrete", "ward": "Ward 93 (Banjara Hills)", "zone": "Khairatabad Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4350, 17.4180], [78.4480, 17.4150], [78.4610, 17.4120] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-006", "name": "Nadeem Colony Box Drain", "street": "Tolichowki Nadeem Colony SWD", "drain_type": "swd", "type": "swd", "drain_wid": 2.4, "drain_dep": 1.8, "drain_len": 2400, "status": "Bad", "material": "RCC Box", "ward": "Ward 70 (Tolichowki)", "zone": "Khairatabad Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.3980, 17.4010], [78.4120, 17.3980], [78.4250, 17.3920] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-007", "name": "Financial District Storm Drain", "street": "Gachibowli ISB Road SWD", "drain_type": "swd", "type": "swd", "drain_wid": 1.8, "drain_dep": 1.4, "drain_len": 3600, "status": "Good", "material": "HDPE Conduit & Box Culvert", "ward": "Ward 105 (Gachibowli)", "zone": "Serilingampally Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.3450, 17.4320], [78.3620, 17.4380], [78.3810, 17.4420] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-008", "name": "Madhapur Hitec City SWD", "street": "Cyber Towers Arterial Conduit", "drain_type": "swd", "type": "swd", "drain_wid": 1.6, "drain_dep": 1.2, "drain_len": 2800, "status": "Good", "material": "RCC Precast", "ward": "Ward 107 (Madhapur)", "zone": "Serilingampally Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.3750, 17.4510], [78.3880, 17.4450], [78.4020, 17.4380] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-009", "name": "Durgam Cheruvu Overflow Drain", "street": "Inorbit Mall Relief Channel", "drain_type": "micro", "type": "micro", "drain_wid": 2.2, "drain_dep": 1.5, "drain_len": 1900, "status": "Good", "material": "Masonry Channel", "ward": "Ward 106 (Jubilee Hills)", "zone": "Khairatabad Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.3880, 17.4320], [78.3980, 17.4280], [78.4110, 17.4210] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-010", "name": "Old City Puranapool SWD", "street": "Puranapool High Street", "drain_type": "micro", "type": "micro", "drain_wid": 2.0, "drain_dep": 1.4, "drain_len": 2200, "status": "Bad", "material": "Stone Masonry", "ward": "Ward 55 (Puranapool)", "zone": "Charminar Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4550, 17.3680], [78.4650, 17.3710], [78.4720, 17.3750] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-011", "name": "Moosarambagh Relief Drain", "street": "Moosarambagh Bridge SWD", "drain_type": "swd", "type": "swd", "drain_wid": 2.5, "drain_dep": 1.6, "drain_len": 2600, "status": "Bad", "material": "RCC Box Culvert", "ward": "Ward 25 (Moosarambagh)", "zone": "LB Nagar Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.5080, 17.3720], [78.5180, 17.3690], [78.5280, 17.3650] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-012", "name": "Charminar Arterial Side Drain", "street": "Pathargatti Heritage Road", "drain_type": "side", "type": "side", "drain_wid": 1.0, "drain_dep": 0.8, "drain_len": 1500, "status": "Good", "material": "Concrete Kerb Channel", "ward": "Ward 50 (Charminar)", "zone": "Charminar Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4740, 17.3610], [78.4750, 17.3680], [78.4760, 17.3730] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-013", "name": "Begumpet Airport Peripheral Drain", "street": "Old Airport Road Drain", "drain_type": "side", "type": "side", "drain_wid": 1.2, "drain_dep": 0.9, "drain_len": 2100, "status": "Good", "material": "RCC Covered", "ward": "Ward 148 (Begumpet)", "zone": "Secunderabad Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4680, 17.4420], [78.4790, 17.4460], [78.4880, 17.4490] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-014", "name": "KBR Park Natural Surface Drain", "street": "KBR National Park Periphery", "drain_type": "open", "type": "open", "drain_wid": 1.5, "drain_dep": 0.8, "drain_len": 1800, "status": "Good", "material": "Earthen Unlined", "ward": "Ward 94 (Jubilee Hills)", "zone": "Khairatabad Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4210, 17.4220], [78.4280, 17.4180], [78.4340, 17.4120] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "HYD-DR-015", "name": "Uppal - Ramanthapur Trunk", "street": "Ramanthapur Main Road SWD", "drain_type": "swd", "type": "swd", "drain_wid": 2.0, "drain_dep": 1.4, "drain_len": 3200, "status": "Good", "material": "Reinforced Concrete", "ward": "Ward 8 (Uppal)", "zone": "LB Nagar Zone" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.5450, 17.3980], [78.5580, 17.3920], [78.5680, 17.3880] ] }
+    }
+  ]
+}

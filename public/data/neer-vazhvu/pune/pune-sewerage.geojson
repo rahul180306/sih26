@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "name": "pune-sewerage",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "layer": "stp", "name": "Dr. Naidu Sewage Treatment Plant", "capacity_mld": 130, "status": "OPERATIONAL", "road": "Raja Bahadur Mill Road", "category": "A" },
+      "geometry": { "type": "Point", "coordinates": [73.8680, 18.5350] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "stp", "name": "Mundhwa Mega STP", "capacity_mld": 180, "status": "OPERATIONAL", "road": "Mundhwa-Kharadi Bridge", "category": "A" },
+      "geometry": { "type": "Point", "coordinates": [73.9250, 18.5380] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "stp", "name": "Baner Mula Riverbank STP", "capacity_mld": 30, "status": "OPERATIONAL", "road": "Baner Riverside Road", "category": "B" },
+      "geometry": { "type": "Point", "coordinates": [73.7950, 18.5680] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "sps", "name": "Koregaon Park Sewage Pumping Station", "capacity_mld": 40, "status": "OPERATIONAL", "road": "North Main Road", "category": "C" },
+      "geometry": { "type": "Point", "coordinates": [73.8950, 18.5380] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "layer": "sps", "name": "Kasba Peth Interceptor SPS", "capacity_mld": 35, "status": "OPERATIONAL", "road": "Nagzari Outfall Point", "category": "C" },
+      "geometry": { "type": "Point", "coordinates": [73.8580, 18.5280] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Mutha North Bank Sewer Interceptor", "type": "sewer", "diameter_m": 1.6 },
+      "geometry": { "type": "LineString", "coordinates": [ [73.8150, 18.4980], [73.8450, 18.5180], [73.8680, 18.5350], [73.9250, 18.5380] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Mutha South Bank Sewer Interceptor", "type": "sewer", "diameter_m": 1.8 },
+      "geometry": { "type": "LineString", "coordinates": [ [73.8250, 18.4850], [73.8550, 18.5120], [73.8850, 18.5320], [73.9250, 18.5380] ] }
+    }
+  ]
+}

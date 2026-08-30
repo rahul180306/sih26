@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "name": "pune-rivers",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Mutha River (Dam Discharge Course)", "type": "river", "flow_status": "Khadakwasla Full Discharge" },
+      "geometry": { "type": "LineString", "coordinates": [ [73.7650, 18.4410], [73.8050, 18.4720], [73.8350, 18.4980], [73.8480, 18.5180], [73.8620, 18.5320] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Mula River", "type": "river", "flow_status": "Regulated Flow" },
+      "geometry": { "type": "LineString", "coordinates": [ [73.7650, 18.5820], [73.8050, 18.5680], [73.8350, 18.5520], [73.8620, 18.5320] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Mula-Mutha Confluence River", "type": "river", "flow_status": "Combined Peak Inundation" },
+      "geometry": { "type": "LineString", "coordinates": [ [73.8620, 18.5320], [73.8920, 18.5380], [73.9350, 18.5450], [73.9850, 18.5520] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pavana River Tributary", "type": "river", "flow_status": "Active Inflow" },
+      "geometry": { "type": "LineString", "coordinates": [ [73.7920, 18.6250], [73.8150, 18.5980], [73.8350, 18.5720] ] }
+    }
+  ]
+}

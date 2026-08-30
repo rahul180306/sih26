@@ -1,0 +1,37 @@
+{
+  "type": "FeatureCollection",
+  "name": "pune-flood-hotspots",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Sinhagad Road Ekta Nagari", "category": "chronic_spot", "location": "Mutha Riverbank Ekta Nagari Society", "ward": "Ward 34 (Sinhagad Road)", "peak_depth_m": 1.4, "year": "2019/2024" },
+      "geometry": { "type": "Point", "coordinates": [73.8290, 18.4880] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Baba Bhide Bridge & Deccan Causeway", "category": "chronic_spot", "location": "JM Road to Alka Talkies Riverbank", "ward": "Ward 15 (Deccan Gymkhana)", "peak_depth_m": 1.2, "year": "2019/2021" },
+      "geometry": { "type": "Point", "coordinates": [73.8480, 18.5180] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pulachi Wadi Riverside Slums", "category": "chronic_spot", "location": "Mutha Riverbed Low-lying Basin", "ward": "Ward 16 (Shivajinagar)", "peak_depth_m": 1.1, "year": "2019" },
+      "geometry": { "type": "Point", "coordinates": [73.8520, 18.5220] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ambil Odha Vaikunth Confluence", "category": "chronic_spot", "location": "Sadashiv Peth Odha Culvert", "ward": "Ward 22 (Kasba)", "peak_depth_m": 1.5, "year": "2019" },
+      "geometry": { "type": "Point", "coordinates": [73.8460, 18.5120] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Sangamwadi - Harris Bridge Mula Basin", "category": "chronic_spot", "location": "Old Mumbai-Pune Highway Bridge", "ward": "Ward 11 (Dapodi)", "peak_depth_m": 0.85, "year": "2021" },
+      "geometry": { "type": "Point", "coordinates": [73.8290, 18.5780] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Katraj Lake Surplus Channel (Gururaj Society)", "category": "chronic_spot", "location": "Ambil Odha Origin Nullah", "ward": "Ward 38 (Katraj)", "peak_depth_m": 0.95, "year": "2019" },
+      "geometry": { "type": "Point", "coordinates": [73.8590, 18.4520] }
+    }
+  ]
+}

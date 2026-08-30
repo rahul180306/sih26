@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "name": "bangalore-flood-hazard-zones",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Bellandur / Outer Ring Road Basin", "category": "very_high", "depth_m": 0.85, "risk": "Very High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [77.6650, 12.9450], [77.6950, 12.9450], [77.6950, 12.9220], [77.6650, 12.9220], [77.6650, 12.9450] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Manyata Tech Park / Nagavara Basin", "category": "very_high", "depth_m": 0.78, "risk": "Very High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [77.6080, 13.0550], [77.6350, 13.0550], [77.6350, 13.0320], [77.6080, 13.0320], [77.6080, 13.0550] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Koramangala 4th Block / Ejipura", "category": "high", "depth_m": 0.62, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [77.6150, 12.9420], [77.6420, 12.9420], [77.6420, 12.9250], [77.6150, 12.9250], [77.6150, 12.9420] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Silk Board / HSR Layout Sector 6", "category": "high", "depth_m": 0.55, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [77.6200, 12.9220], [77.6450, 12.9220], [77.6450, 12.9050], [77.6200, 12.9050], [77.6200, 12.9220] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Bhadrappa Layout / Hebbal SWD Bend", "category": "high", "depth_m": 0.50, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [77.5680, 13.0580], [77.5920, 13.0580], [77.5920, 13.0380], [77.5680, 13.0380], [77.5680, 13.0580] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Varthur Lake Wetland Overflow Basin", "category": "moderate", "depth_m": 0.28, "risk": "Moderate" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [77.7280, 12.9520], [77.7550, 12.9520], [77.7550, 12.9320], [77.7280, 12.9320], [77.7280, 12.9520] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Sadashivanagar / High Ground Ridge", "category": "very_low", "depth_m": 0.00, "risk": "Very Low" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [77.5720, 13.0150], [77.5950, 13.0150], [77.5950, 12.9950], [77.5720, 12.9950], [77.5720, 13.0150] ] ] }
+    }
+  ]
+}

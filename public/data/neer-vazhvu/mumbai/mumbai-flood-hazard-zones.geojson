@@ -1,0 +1,37 @@
+{
+  "type": "FeatureCollection",
+  "name": "mumbai-flood-hazard-zones",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Hindmata / Dadar TT Basin", "category": "very_high", "depth_m": 0.88, "risk": "Very High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [72.8380, 19.0250], [72.8580, 19.0250], [72.8580, 19.0080], [72.8380, 19.0080], [72.8380, 19.0250] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Kurla West / Mithi River Corridor", "category": "very_high", "depth_m": 0.92, "risk": "Very High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [72.8620, 19.0780], [72.8880, 19.0780], [72.8880, 19.0550], [72.8620, 19.0550], [72.8620, 19.0780] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Milan & Andheri Subway Depression", "category": "high", "depth_m": 0.65, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [72.8350, 19.1250], [72.8550, 19.1250], [72.8550, 19.0800], [72.8350, 19.0800], [72.8350, 19.1250] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Sion / Gandhi Market Lowlands", "category": "high", "depth_m": 0.58, "risk": "High" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [72.8550, 19.0480], [72.8750, 19.0480], [72.8750, 19.0320], [72.8550, 19.0320], [72.8550, 19.0480] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "BKC / Mahim Creek Margin", "category": "moderate", "depth_m": 0.28, "risk": "Moderate" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [72.8520, 19.0680], [72.8780, 19.0680], [72.8780, 19.0520], [72.8520, 19.0520], [72.8520, 19.0680] ] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Malabar Hill / Ridge", "category": "very_low", "depth_m": 0.00, "risk": "Very Low" },
+      "geometry": { "type": "Polygon", "coordinates": [ [ [72.7950, 18.9650], [72.8180, 18.9650], [72.8180, 18.9420], [72.7950, 18.9420], [72.7950, 18.9650] ] ] }
+    }
+  ]
+}

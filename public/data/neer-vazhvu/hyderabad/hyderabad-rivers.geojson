@@ -1,0 +1,22 @@
+{
+  "type": "FeatureCollection",
+  "name": "hyderabad-rivers",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Musi River (Main Corridor)", "type": "river", "flow_status": "High Surge Discharge" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.3030, 17.3780], [78.3650, 17.3790], [78.4120, 17.3740], [78.4550, 17.3710], [78.4820, 17.3730], [78.5150, 17.3680], [78.5650, 17.3580], [78.6100, 17.3450] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Esa River Tributary", "type": "river", "flow_status": "Spillway Outflow Active" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.3620, 17.3180], [78.3880, 17.3350], [78.4120, 17.3550], [78.4350, 17.3720] ] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Kukatpally Inflow Corridor", "type": "river", "flow_status": "Active Gravity Runoff" },
+      "geometry": { "type": "LineString", "coordinates": [ [78.4150, 17.4820], [78.4410, 17.4580], [78.4650, 17.4350] ] }
+    }
+  ]
+}

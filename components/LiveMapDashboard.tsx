@@ -51,6 +51,10 @@ import {
   STATE_BOUNDARIES_GEOJSON,
   DeploymentCity,
 } from '@/lib/geoData';
+import {
+  NEER_VAZHVU_CITY_LAYERS,
+  type NeerVazhvuLayerKey,
+} from '@/lib/neerVazhvu';
 
 interface LiveMapDashboardProps {
   isOpen: boolean;
@@ -107,6 +111,13 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFabricModalOpen, setIsFabricModalOpen] = useState(false);
+  const [neerVazhvuVisible, setNeerVazhvuVisible] = useState<Record<NeerVazhvuLayerKey, boolean>>({
+    drainage: true,
+    sewer: true,
+    river: true,
+    flood: true,
+    reservoir: true,
+  });
   const [rainfallSnapshot, setRainfallSnapshot] = useState<RainfallSnapshot | null>(null);
   const [nasaTelemetry, setNasaTelemetry] = useState<{
     authenticated: boolean;
@@ -360,26 +371,39 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
       const maplibregl = await import('maplibre-gl');
       if (!isMounted || !mapContainerRef.current) return;
 
-      // Dark CartoDB Matter tile layer with dark contrast
+      // Dark Esri Canvas Base + Reference layer with clear State & City labels (100% free, no API key, no watermark)
       const mapStyle = {
         version: 8 as const,
         sources: {
-          'carto-dark': {
+          'esri-dark-base': {
             type: 'raster' as const,
             tiles: [
-              'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-              'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-              'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
             ],
             tileSize: 256,
-            attribution: '© OpenStreetMap, © CARTO, JalRakshak Digital Twin',
+            attribution: '© Esri, HERE, Garmin, OpenStreetMap contributors',
+          },
+          'esri-dark-ref': {
+            type: 'raster' as const,
+            tiles: [
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+            ],
+            tileSize: 256,
+            attribution: '© Esri Labels',
           },
         },
         layers: [
           {
-            id: 'carto-dark-layer',
+            id: 'esri-dark-base-layer',
             type: 'raster' as const,
-            source: 'carto-dark',
+            source: 'esri-dark-base',
+            minzoom: 0,
+            maxzoom: 20,
+          },
+          {
+            id: 'esri-dark-ref-layer',
+            type: 'raster' as const,
+            source: 'esri-dark-ref',
             minzoom: 0,
             maxzoom: 20,
           },
@@ -557,6 +581,74 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
       }
     };
   }, [isOpen, clearMarkers]);
+
+  // Load project-local Neer Vaazhvu GeoJSON layers dynamically for the selected city
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const cityLayers = NEER_VAZHVU_CITY_LAYERS[currentCityData.id] || NEER_VAZHVU_CITY_LAYERS.mumbai;
+
+    const addNeerLayer = (id: string, layerKey: NeerVazhvuLayerKey, paint: any, type: 'line' | 'fill' | 'circle' = 'line') => {
+      if (map.getLayer(id)) {
+        map.removeLayer(id);
+      }
+      if (map.getSource(id)) {
+        map.removeSource(id);
+      }
+
+      fetch(cityLayers[layerKey])
+        .then((response) => {
+          if (!response.ok) return;
+          return response.json();
+        })
+        .then((geojson) => {
+          if (!geojson || !geojson.features || geojson.features.length === 0) return;
+
+          map.addSource(id, { type: 'geojson', data: geojson as GeoJSON.GeoJSON });
+          const layerConfig: any = {
+            id,
+            type,
+            source: id,
+            paint,
+          };
+          map.addLayer(layerConfig);
+        })
+        .catch(() => undefined);
+    };
+
+    const layerStyles: Array<[string, NeerVazhvuLayerKey, any, 'line' | 'fill' | 'circle']> = [
+      ['neer-drainage', 'drainage', {
+        'line-color': '#38BDF8',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.2, 15, 3],
+        'line-opacity': neerVazhvuVisible.drainage ? 0.9 : 0,
+      }, 'line'],
+      ['neer-sewer', 'sewer', {
+        'line-color': '#A78BFA',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 15, 2.4],
+        'line-opacity': neerVazhvuVisible.sewer ? 0.8 : 0,
+      }, 'line'],
+      ['neer-river', 'river', {
+        'line-color': '#22D3EE',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.4, 15, 4],
+        'line-opacity': neerVazhvuVisible.river ? 0.9 : 0,
+      }, 'line'],
+      ['neer-flood', 'flood', {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 4, 15, 10],
+        'circle-color': '#F97316',
+        'circle-opacity': neerVazhvuVisible.flood ? 0.9 : 0,
+      }, 'circle'],
+      ['neer-reservoir', 'reservoir', {
+        'fill-color': '#34D399',
+        'fill-opacity': neerVazhvuVisible.reservoir ? 0.25 : 0,
+        'fill-outline-color': '#10B981',
+      }, 'fill'],
+    ];
+
+    layerStyles.forEach(([id, layerKey, paint, kind]) => {
+      addNeerLayer(id, layerKey, paint, kind);
+    });
+  }, [currentCityData.id, neerVazhvuVisible]);
 
   // Update Map Sources & Markers when drillLevel or selectedCity changes
   useEffect(() => {
@@ -1164,23 +1256,46 @@ export const LiveMapDashboard: React.FC<LiveMapDashboardProps> = ({ isOpen, onCl
 
             {/* Floating Left Legend */}
             <div className="absolute bottom-16 left-4 z-20 bg-[#121824]/90 backdrop-blur-md border border-white/15 p-3 rounded-2xl shadow-xl pointer-events-auto">
-              <span className="text-[11px] font-bold text-white/70 block mb-2">Flood Inundation (m)</span>
+              <span className="text-[11px] font-bold text-white/70 block mb-2">Neer Vaazhvu Infrastructure</span>
               <div className="space-y-1.5 text-[11px] font-medium text-white/80">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                  <span>&lt; 0.20 m (Safe)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-                  <span>0.20 – 0.50 m (Low)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                  <span>0.50 – 0.80 m (Medium)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                  <span>&gt; 0.80 m (Critical)</span>
+                {[
+                  { key: 'drainage', label: 'Drainage', color: 'bg-sky-400' },
+                  { key: 'sewer', label: 'Sewer / Pipeline', color: 'bg-violet-400' },
+                  { key: 'river', label: 'Rivers', color: 'bg-cyan-400' },
+                  { key: 'flood', label: 'Flood hotspots', color: 'bg-orange-500' },
+                  { key: 'reservoir', label: 'Reservoir/catchments', color: 'bg-emerald-400' },
+                ].map((layer) => (
+                  <button
+                    key={layer.key}
+                    type="button"
+                    onClick={() => setNeerVazhvuVisible((prev) => ({ ...prev, [layer.key]: !prev[layer.key as NeerVazhvuLayerKey] }))}
+                    className="flex items-center gap-2 w-full text-left hover:text-white transition-colors cursor-pointer"
+                  >
+                    <span className={`w-2.5 h-2.5 rounded-full ${layer.color}`} />
+                    <span>{layer.label}</span>
+                    <span className="ml-auto text-[9px] uppercase text-white/50">{neerVazhvuVisible[layer.key as NeerVazhvuLayerKey] ? 'On' : 'Off'}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-3 border-t border-white/10 pt-2">
+                <span className="text-[11px] font-bold text-white/70 block mb-2">Flood Inundation (m)</span>
+                <div className="space-y-1.5 text-[11px] font-medium text-white/80">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                    <span>&lt; 0.20 m (Safe)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                    <span>0.20 – 0.50 m (Low)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                    <span>0.50 – 0.80 m (Medium)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                    <span>&gt; 0.80 m (Critical)</span>
+                  </div>
                 </div>
               </div>
             </div>
